@@ -233,7 +233,9 @@ contract BPool is BToken, BMath {
         _finalized = true;
         _publicSwap = true;
 
+        //mint new token, add to balance and total supply
         _mintPoolShare(INIT_POOL_SUPPLY);
+        //move new token to msg.sender
         _pushPoolShare(msg.sender, INIT_POOL_SUPPLY);
     }
 
