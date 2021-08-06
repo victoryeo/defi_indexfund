@@ -76,4 +76,9 @@ contract BFactory {
         bool xfer = pool.transfer(_blabs, collected);
         require(xfer, "ERR_ERC20_FAILED");
     }
+
+    function getThisBalance(BPool pool) external view returns (uint) {
+        uint collected = IERC20(pool).balanceOf(address(this));
+        return collected;
+    }
 }
