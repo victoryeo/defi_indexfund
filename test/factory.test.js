@@ -1,6 +1,7 @@
 const BPool = artifacts.require('BPool');
 const BFactory = artifacts.require('BFactory');
 const TToken = artifacts.require('TToken');
+const BConst = artifacts.require('BConst');
 
 const { assert } = require('chai');
 const truffleAssert = require('truffle-assertions');
@@ -24,6 +25,8 @@ contract('BFactory', async (accounts) => {
   let dai;
 
   before(async () => {
+    bconst = await BConst.deployed();
+
     factory = await BFactory.deployed();
     weth = await TToken.new('Wrapped Ether', 'WETH', 18);
     dai = await TToken.new('Dai Stablecoin', 'DAI', 18);
@@ -96,7 +99,10 @@ contract('BFactory', async (accounts) => {
       // Exit fee = 0 so this does nothing
       await factory.collect(POOL);
 
-      assert.equal(fromWei(adminBalance), '100');
+      const BONE = await bconst.getBONE()
+      const INIT_POOL_SUPPLY = await bconst.getINITPOOLSUPPLY()
+      const amount = INIT_POOL_SUPPLY/BONE
+      assert.equal(fromWei(adminBalance), amount);
     });
   })
 
