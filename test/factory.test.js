@@ -2,6 +2,7 @@ const BPool = artifacts.require('BPool');
 const BFactory = artifacts.require('BFactory');
 const TToken = artifacts.require('TToken');
 
+const { assert } = require('chai');
 const truffleAssert = require('truffle-assertions');
 
 contract('BFactory', async (accounts) => {
@@ -39,11 +40,14 @@ contract('BFactory', async (accounts) => {
     await dai.mint(nonAdmin, toWei('50'), { from: admin });
 
     POOL = await factory.newBPool.call(); // this works fine in clean room
+    console.log(`POOL ${POOL}`)
     await factory.newBPool();
     pool = await BPool.at(POOL);
+    //console.log("pool ", pool)
 
     await weth.approve(POOL, MAX);
     await dai.approve(POOL, MAX);
+    console.log(`MAX ${MAX}`)
 
     await weth.approve(POOL, MAX, { from: nonAdmin });
     await dai.approve(POOL, MAX, { from: nonAdmin });
@@ -60,24 +64,38 @@ contract('BFactory', async (accounts) => {
       assert.isTrue(isBPool);
     });
 
+    it('isBlab equal to account 0', async() => {
+      const blab = await factory.getBLabs()
+      console.log(`blab ${blab}`)
+      assert.equal(blab, accounts[0])
+    })
+
     it('fails nonAdmin calls collect', async () => {
+      // expect to fail because
+      // nonAdmin is not same as blab
       await truffleAssert.reverts(factory.collect(nonAdmin, { from: nonAdmin }), 'ERR_NOT_BLABS');
     });
 
     it('admin collects fees', async () => {
+      let adminBalance = await pool.balanceOf(admin);
+      console.log("adminBalance ", adminBalance.toString())
+
       await pool.bind(WETH, toWei('5'), toWei('5'));
       await pool.bind(DAI, toWei('200'), toWei('5'));
 
       await pool.finalize();
 
+      adminBalance = await pool.balanceOf(admin);
+      console.log("adminBalance ", adminBalance.toString())
+
       await pool.joinPool(toWei('10'), [MAX, MAX], { from: nonAdmin });
       await pool.exitPool(toWei('10'), [toWei('0'), toWei('0')], { from: nonAdmin });
 
-      // Exit fee = 0 so this wont do anything
+      const thisbalance = await factory.getThisBalance(POOL)
+      console.log("thisbalance ", thisbalance.toString())
+      // Exit fee = 0 so this does nothing
       await factory.collect(POOL);
 
-      const adminBalance = await pool.balanceOf(admin);
-      console.log(adminBalance.toString())
       assert.equal(fromWei(adminBalance), '100');
     });
   })
