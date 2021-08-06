@@ -38,4 +38,12 @@ contract BConst {
 
     uint public constant MAX_IN_RATIO      = BONE / 2;
     uint public constant MAX_OUT_RATIO     = (BONE / 3) + 1 wei;
+
+    function getBONE() external pure returns (uint) {
+        return BONE;
+    }
+
+    function getINITPOOLSUPPLY() external pure returns (uint) {
+        return INIT_POOL_SUPPLY;
+    }
 }
