@@ -198,6 +198,26 @@ contract('BPool', async (accounts) => {
                 'ERR_NOT_FINALIZED',
             );
         });
-
     })
+
+    describe('Finalizing pool', () => {
+        it('Fails when other users interact before finalizing', async () => {
+            await truffleAssert.reverts(
+                pool.bind(WETH, toWei('5'), toWei('5'), { from: user1 }),
+                'ERR_NOT_CONTROLLER',
+            );
+            await truffleAssert.reverts(
+                pool.joinPool(toWei('1'), [MAX, MAX], { from: user1 }),
+                'ERR_NOT_FINALIZED',
+            );
+            await truffleAssert.reverts(
+                pool.exitPool(toWei('1'), [toWei('0'), toWei('0')], { from: user1 }),
+                'ERR_NOT_FINALIZED',
+            );
+            await truffleAssert.reverts(
+                pool.unbind(DAI, { from: user1 }),
+                'ERR_NOT_CONTROLLER',
+            );
+        });
+    })   
 })
