@@ -84,5 +84,40 @@ contract('BPool', async (accounts) => {
             );
         });
 
+        it('Admin approves tokens', async () => {
+            await weth.approve(POOL, MAX);
+            await mkr.approve(POOL, MAX);
+            await dai.approve(POOL, MAX);
+            await xxx.approve(POOL, MAX);
+        });
+
+        it('binding tokens that are approved', async () => {
+            await truffleAssert.passes(
+                pool.bind(MKR, toWei('10'), toWei('2.5'))
+            );
+            //NotSame event is raised because in TToken transferFrom 
+            //msg.sender is POOL address and src is accounts[0]
+            mkr.getPastEvents('NotSame', {fromBlock: 0, toBlock: 'latest'}, {})
+            .then(function(events){
+                console.log(POOL)
+                console.log(events) 
+            })
+        });
+
+        it('Fails binding weights and balances outside MIX MAX', async () => {
+            await truffleAssert.reverts(
+                pool.bind(WETH, toWei('51'), toWei('1')),
+                'ERR_INSUFFICIENT_BAL',
+            );
+            await truffleAssert.reverts(
+                pool.bind(DAI, toWei('1000'), toWei('0.99')),
+                'ERR_MIN_WEIGHT',
+            );
+            await truffleAssert.reverts(
+                pool.bind(WETH, toWei('5'), toWei('50.01')),
+                'ERR_MAX_WEIGHT',
+            );
+        });
+
     })
 })
