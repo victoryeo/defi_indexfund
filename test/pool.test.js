@@ -119,5 +119,21 @@ contract('BPool', async (accounts) => {
             );
         });
 
+        it('Fails finalizing pool without 2 tokens', async () => {
+            await truffleAssert.reverts(
+                pool.finalize(),
+                'ERR_MIN_TOKENS',
+            );
+        });
+
+        it('Finalizing pool with 2 tokens', async () => {
+            await truffleAssert.passes(
+                pool.bind(WETH, toWei('50'), toWei('1'))
+            );
+            await truffleAssert.passes(
+                pool.finalize(),
+            );
+        });
+
     })
 })
