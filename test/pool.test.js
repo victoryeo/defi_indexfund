@@ -3,6 +3,8 @@ const BFactory = artifacts.require('BFactory');
 const TToken = artifacts.require('TToken');
 const verbose = process.env.VERBOSE;
 
+const truffleAssert = require('truffle-assertions');
+
 contract('BPool', async (accounts) => {
     const admin = accounts[0];
     const user1 = accounts[1];
@@ -67,5 +69,20 @@ contract('BPool', async (accounts) => {
             const controller = await pool.getController();
             assert.equal(controller, admin);
         });
+
+        it('Pool starts with no bound tokens', async () => {
+            const numTokens = await pool.getNumTokens();
+            assert.equal(0, numTokens);
+            const isBound = await pool.isBound.call(WETH);
+            assert(!isBound);
+        });
+
+        it('Fails binding tokens that are not approved', async () => {
+            await truffleAssert.reverts(
+                pool.bind(MKR, toWei('10'), toWei('2.5')),
+                'ERR_BTOKEN_CALLER_NOT_ALLOWED',
+            );
+        });
+
     })
 })
