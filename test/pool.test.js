@@ -151,5 +151,53 @@ contract('BPool', async (accounts) => {
             assert.equal(20, fromWei(mkrBalance));
         });
 
+        it('Admin unbinds token', async () => {
+            await pool.bind(XXX, toWei('10'), toWei('5'));
+            let adminBalance = await xxx.balanceOf(admin);
+            assert.equal(0, fromWei(adminBalance));
+            await pool.unbind(XXX);
+            adminBalance = await xxx.balanceOf(admin);
+            assert.equal(10, fromWei(adminBalance));
+            const numTokens = await pool.getNumTokens();
+            assert.equal(3, numTokens);
+            const totalDernomWeight = await pool.getTotalDenormalizedWeight();
+            assert.equal(15, fromWei(totalDernomWeight));
+        });
+
+        it('Fails binding above MAX TOTAL WEIGHT', async () => {
+            //MAX_TOTAL_WEIGHT is 50
+            await truffleAssert.reverts(
+                pool.bind(XXX, toWei('1'), toWei('36')),
+                'ERR_MAX_TOTAL_WEIGHT',
+            );
+        });
+
+        it('Fails rebinding token or unbinding random token', async () => {
+            await truffleAssert.reverts(
+                pool.bind(WETH, toWei('0'), toWei('1')),
+                'ERR_IS_BOUND',
+            );
+            await truffleAssert.reverts(
+                pool.rebind(XXX, toWei('0'), toWei('1')),
+                'ERR_NOT_BOUND',
+            );
+            await truffleAssert.reverts(
+                pool.unbind(XXX),
+                'ERR_NOT_BOUND',
+            );
+        });
+
+        it('Get current tokens', async () => {
+            const currentTokens = await pool.getCurrentTokens();
+            assert.sameMembers(currentTokens, [WETH, MKR, DAI]);
+        });
+
+        it('Fails getting final tokens before finalized', async () => {
+            await truffleAssert.reverts(
+                pool.getFinalTokens(),
+                'ERR_NOT_FINALIZED',
+            );
+        });
+
     })
 })
