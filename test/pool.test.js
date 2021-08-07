@@ -93,7 +93,7 @@ contract('BPool', async (accounts) => {
 
         it('binding tokens that are approved', async () => {
             await truffleAssert.passes(
-                pool.bind(MKR, toWei('10'), toWei('2.5'))
+                pool.bind(MKR, toWei('20'), toWei('5'))
             );
             //NotSame event is raised because in TToken transferFrom 
             //msg.sender is POOL address and src is accounts[0]
@@ -126,13 +126,29 @@ contract('BPool', async (accounts) => {
             );
         });
 
-        it('Finalizing pool with 2 tokens', async () => {
+        /*it('Finalizing pool with 2 tokens', async () => {
             await truffleAssert.passes(
-                pool.bind(WETH, toWei('50'), toWei('1'))
+                pool.bind(WETH, toWei('50'), toWei('5'))
             );
             await truffleAssert.passes(
                 pool.finalize(),
             );
+        });*/
+
+        it('Admin binds tokens', async () => {
+            // Equal weights WETH, MKR, DAI
+            await pool.bind(WETH, toWei('50'), toWei('5'));
+            await pool.bind(DAI, toWei('10000'), toWei('5'));
+            const numTokens = await pool.getNumTokens();
+            assert.equal(3, numTokens);
+            const totalDernomWeight = await pool.getTotalDenormalizedWeight();
+            assert.equal(15, fromWei(totalDernomWeight));
+            const wethDenormWeight = await pool.getDenormalizedWeight(WETH);
+            assert.equal(5, fromWei(wethDenormWeight));
+            const wethNormWeight = await pool.getNormalizedWeight(WETH);
+            assert.equal(0.333333333333333333, fromWei(wethNormWeight));
+            const mkrBalance = await pool.getBalance(MKR);
+            assert.equal(20, fromWei(mkrBalance));
         });
 
     })
