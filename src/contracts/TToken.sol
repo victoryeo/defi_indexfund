@@ -35,6 +35,7 @@ contract TToken {
 
     event Approval(address indexed src, address indexed dst, uint amt);
     event Transfer(address indexed src, address indexed dst, uint amt);
+    event NotSame(address sender, address src);
 
     // Math
     function add(uint a, uint b) internal pure returns (uint c) {
@@ -126,6 +127,9 @@ contract TToken {
 
     function transferFrom(address src, address dst, uint amt) external returns (bool) {
         require(msg.sender == src || amt <= _allowance[src][msg.sender], "ERR_BTOKEN_CALLER_NOT_ALLOWED");
+        if (msg.sender != src) {
+            emit NotSame(msg.sender, src);
+        }
         _move(src, dst, amt);
         if (msg.sender != src && _allowance[src][msg.sender] != uint256(-1)) {
             _allowance[src][msg.sender] = sub(_allowance[src][msg.sender], amt);
