@@ -129,7 +129,7 @@ contract BToken is BTokenBase, IERC20 {
     }
 
     function transferFrom(address src, address dst, uint amt) external returns (bool) {
-        require(msg.sender == src || amt <= _allowance[src][msg.sender], "ERR_BTOKEN_BAD_CALLER");
+        require(msg.sender == src || amt <= _allowance[src][msg.sender], "ERR_BTOKEN_CALLER_NOT_ALLOWED");
         _move(src, dst, amt);
         if (msg.sender != src && _allowance[src][msg.sender] != uint256(-1)) {
             _allowance[src][msg.sender] = bsub(_allowance[src][msg.sender], amt);
