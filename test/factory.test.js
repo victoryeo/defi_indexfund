@@ -73,10 +73,14 @@ contract('BFactory', async (accounts) => {
       assert.equal(blab, accounts[0])
     })
 
-    it('fails nonAdmin calls collect', async () => {
+    it('nonAdmin cant collect', async () => {
       // expect to fail because
       // nonAdmin is not same as blab
       await truffleAssert.reverts(factory.collect(nonAdmin, { from: nonAdmin }), 'ERR_NOT_BLABS');
+    });
+
+    it('nonadmin cant set blabs address', async () => {
+      await truffleAssert.reverts(factory.setBLabs(nonAdmin, { from: nonAdmin }), 'ERR_NOT_BLABS');
     });
 
     it('admin collects fees', async () => {
@@ -103,6 +107,12 @@ contract('BFactory', async (accounts) => {
       const INIT_POOL_SUPPLY = await bconst.getINITPOOLSUPPLY()
       const amount = INIT_POOL_SUPPLY/BONE
       assert.equal(fromWei(adminBalance), amount);
+    });
+    
+    it('admin changes blabs address', async () => {
+      await factory.setBLabs(user2);
+      const blab = await factory.getBLabs();
+      assert.equal(blab, user2);
     });
   })
 
