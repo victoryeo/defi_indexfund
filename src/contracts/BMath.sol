@@ -263,7 +263,12 @@ contract BMath is BConst, BNum {
 
         // charge exit fee on the pool token side
         // pAi = pAiAfterExitFee/(1-exitFee)
-        poolAmountIn = bdiv(poolAmountInAfterExitFee, bsub(BONE, EXIT_FEE));
+        uint divider;
+        if (EXIT_FEE == 0)
+            divider = BONE;
+        else
+            divider = bsub(BONE, EXIT_FEE);
+        poolAmountIn = bdiv(poolAmountInAfterExitFee, divider);
         return poolAmountIn;
     }
 
