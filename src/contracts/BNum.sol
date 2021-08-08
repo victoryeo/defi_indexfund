@@ -72,17 +72,24 @@ contract BNum is BConst {
         return c2;
     }
 
-    function bdiv(uint a, uint b)
+    function bdiv(uint numerator, uint denominator)
         internal pure
         returns (uint)
     {
-        require(b != 0, "ERR_DIV_ZERO");
-        uint c0 = a * BONE;
-        require(a == 0 || c0 / a == BONE, "ERR_DIV_INTERNAL"); // bmul overflow
-        uint c1 = c0 + (b / 2);
+        // raise numerator to power of 19
+        uint _numerator  = numerator * BONE * 10;
+        require(numerator == 0 || _numerator / numerator == BONE * 10, "ERR_DIV_INTERNAL");
+        // with rounding of last digit
+        uint _quotient =  ((_numerator / denominator) + 5) / 10;
+        return ( _quotient);
+
+        /*require(denominator != 0, "ERR_DIV_ZERO");
+        uint c0 = numerator * BONE;
+        require(numerator == 0 || c0 / numerator == BONE, "ERR_DIV_INTERNAL"); // bmul overflow
+        uint c1 = c0 + (denominator / 2);
         require(c1 >= c0, "ERR_DIV_INTERNAL"); //  badd require
-        uint c2 = c1 / b;
-        return c2;
+        uint c2 = c1 / denominator;
+        return c2;*/
     }
 
     // DSMath.wpow
