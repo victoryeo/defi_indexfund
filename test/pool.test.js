@@ -219,5 +219,24 @@ contract('BPool', async (accounts) => {
                 'ERR_NOT_CONTROLLER',
             );
         });
+
+        it('Fails calling any swap before finalizing', async () => {
+            await truffleAssert.reverts(
+                pool.swapExactAmountIn(WETH, toWei('2.5'), DAI, toWei('475'), toWei('200')),
+                'ERR_SWAP_NOT_PUBLIC',
+            );
+            await truffleAssert.reverts(
+                pool.swapExactAmountIn(DAI, toWei('2.5'), WETH, toWei('475'), toWei('200')),
+                'ERR_SWAP_NOT_PUBLIC',
+            );
+            await truffleAssert.reverts(
+                pool.swapExactAmountOut(WETH, toWei('2.5'), DAI, toWei('475'), toWei('200')),
+                'ERR_SWAP_NOT_PUBLIC',
+            );
+            await truffleAssert.reverts(
+                pool.swapExactAmountOut(DAI, toWei('2.5'), WETH, toWei('475'), toWei('200')),
+                'ERR_SWAP_NOT_PUBLIC',
+            );
+        });
     })   
 })
