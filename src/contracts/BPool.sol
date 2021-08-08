@@ -51,6 +51,8 @@ contract BPool is BToken, BMath {
         bytes           data
     ) anonymous;
 
+    event EXIT_FEE_AMT(uint poolAmountIn, uint exitFee);
+
     modifier _logs_() {
         emit LOG_CALL(msg.sig, msg.sender, msg.data);
         _;
@@ -545,6 +547,155 @@ contract BPool is BToken, BMath {
         return (tokenAmountIn, spotPriceAfter);
     }
 
+    function joinswapExternAmountIn(address tokenIn, uint tokenAmountIn, uint minPoolAmountOut)
+        external
+        _logs_
+        _lock_
+        returns (uint poolAmountOut)
+
+    {        
+        require(_finalized, "ERR_NOT_FINALIZED");
+        require(_records[tokenIn].bound, "ERR_NOT_BOUND");
+        require(tokenAmountIn <= bmul(_records[tokenIn].balance, MAX_IN_RATIO), "ERR_MAX_IN_RATIO");
+
+        Record storage inRecord = _records[tokenIn];
+
+        //poolAmountOut = 0;
+        poolAmountOut = calcPoolOutGivenSingleIn(
+                            inRecord.balance,
+                            inRecord.denorm,
+                            _totalSupply,
+                            _totalWeight,
+                            tokenAmountIn,
+                            _swapFee
+                        );
+
+        require(poolAmountOut >= minPoolAmountOut, "ERR_LIMIT_OUT");
+
+        inRecord.balance = badd(inRecord.balance, tokenAmountIn);
+
+        emit LOG_JOIN(msg.sender, tokenIn, tokenAmountIn);
+
+        _mintPoolShare(poolAmountOut);
+        _pushPoolShare(msg.sender, poolAmountOut);
+        _pullUnderlying(tokenIn, msg.sender, tokenAmountIn);
+
+        return poolAmountOut;
+    }
+
+    function joinswapPoolAmountOut(address tokenIn, uint poolAmountOut, uint maxAmountIn)
+        external
+        _logs_
+        _lock_
+        returns (uint tokenAmountIn)
+    {
+        require(_finalized, "ERR_NOT_FINALIZED");
+        require(_records[tokenIn].bound, "ERR_NOT_BOUND");
+
+        Record storage inRecord = _records[tokenIn];
+
+        tokenAmountIn = calcSingleInGivenPoolOut(
+                            inRecord.balance,
+                            inRecord.denorm,
+                            _totalSupply,
+                            _totalWeight,
+                            poolAmountOut,
+                            _swapFee
+                        );
+
+        require(tokenAmountIn != 0, "ERR_MATH_APPROX");
+        require(tokenAmountIn <= maxAmountIn, "ERR_LIMIT_IN");
+        
+        require(tokenAmountIn <= bmul(_records[tokenIn].balance, MAX_IN_RATIO), "ERR_MAX_IN_RATIO");
+
+        inRecord.balance = badd(inRecord.balance, tokenAmountIn);
+
+        emit LOG_JOIN(msg.sender, tokenIn, tokenAmountIn);
+
+        _mintPoolShare(poolAmountOut);
+        _pushPoolShare(msg.sender, poolAmountOut);
+        _pullUnderlying(tokenIn, msg.sender, tokenAmountIn);
+
+        return tokenAmountIn;
+    }
+
+    function exitswapPoolAmountIn(address tokenOut, uint poolAmountIn, uint minAmountOut)
+        external
+        _logs_
+        _lock_
+        returns (uint tokenAmountOut)
+    {
+        require(_finalized, "ERR_NOT_FINALIZED");
+        require(_records[tokenOut].bound, "ERR_NOT_BOUND");
+
+        Record storage outRecord = _records[tokenOut];
+
+        tokenAmountOut = calcSingleOutGivenPoolIn(
+                            outRecord.balance,
+                            outRecord.denorm,
+                            _totalSupply,
+                            _totalWeight,
+                            poolAmountIn,
+                            _swapFee
+                        );
+
+        require(tokenAmountOut >= minAmountOut, "ERR_LIMIT_OUT");
+        
+        require(tokenAmountOut <= bmul(_records[tokenOut].balance, MAX_OUT_RATIO), "ERR_MAX_OUT_RATIO");
+
+        outRecord.balance = bsub(outRecord.balance, tokenAmountOut);
+
+        uint exitFee = bmul(poolAmountIn, EXIT_FEE);
+
+        emit LOG_EXIT(msg.sender, tokenOut, tokenAmountOut);
+
+        _pullPoolShare(msg.sender, poolAmountIn);
+        _burnPoolShare(bsub(poolAmountIn, exitFee));
+        _pushPoolShare(_factory, exitFee);
+        _pushUnderlying(tokenOut, msg.sender, tokenAmountOut);
+
+        return tokenAmountOut;
+    }
+
+    function exitswapExternAmountOut(address tokenOut, uint tokenAmountOut, uint maxPoolAmountIn)
+        external
+        _logs_
+        _lock_
+        returns (uint poolAmountIn)
+    {
+        require(_finalized, "ERR_NOT_FINALIZED");
+        require(_records[tokenOut].bound, "ERR_NOT_BOUND");
+        require(tokenAmountOut <= bmul(_records[tokenOut].balance, MAX_OUT_RATIO), "ERR_MAX_OUT_RATIO");
+
+        Record storage outRecord = _records[tokenOut];
+
+        poolAmountIn = calcPoolInGivenSingleOut(
+                            outRecord.balance,
+                            outRecord.denorm,
+                            _totalSupply,
+                            _totalWeight,
+                            tokenAmountOut,
+                            _swapFee
+                        );
+
+        require(poolAmountIn != 0, "ERR_MATH_APPROX");
+        require(poolAmountIn <= maxPoolAmountIn, "ERR_LIMIT_IN");
+
+        outRecord.balance = bsub(outRecord.balance, tokenAmountOut);
+
+        uint exitFee = bmul(poolAmountIn, EXIT_FEE);
+        //uint exitFee = 0;
+
+        emit LOG_EXIT(msg.sender, tokenOut, tokenAmountOut);
+
+        _pullPoolShare(msg.sender, poolAmountIn);
+        emit EXIT_FEE_AMT(poolAmountIn, exitFee);
+        _burnPoolShare(bsub(poolAmountIn, exitFee));
+        _pushPoolShare(_factory, exitFee);
+        _pushUnderlying(tokenOut, msg.sender, tokenAmountOut);    
+
+        return poolAmountIn;
+    }
 
     // ==
     // 'Underlying' token-manipulation functions make external calls but are NOT locked
