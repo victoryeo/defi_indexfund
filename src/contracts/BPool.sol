@@ -420,6 +420,130 @@ contract BPool is BToken, BMath {
 
     }
 
+    function swapExactAmountIn(
+        address tokenIn,
+        uint tokenAmountIn,
+        address tokenOut,
+        uint minAmountOut,
+        uint maxPrice
+    )
+        external
+        _logs_
+        _lock_
+        returns (uint tokenAmountOut, uint spotPriceAfter)
+    {
+
+        require(_records[tokenIn].bound, "ERR_NOT_BOUND");
+        require(_records[tokenOut].bound, "ERR_NOT_BOUND");
+        require(_publicSwap, "ERR_SWAP_NOT_PUBLIC");
+
+        Record storage inRecord = _records[address(tokenIn)];
+        Record storage outRecord = _records[address(tokenOut)];
+
+        require(tokenAmountIn <= bmul(inRecord.balance, MAX_IN_RATIO), "ERR_MAX_IN_RATIO");
+
+        uint spotPriceBefore = calcSpotPrice(
+                                    inRecord.balance,
+                                    inRecord.denorm,
+                                    outRecord.balance,
+                                    outRecord.denorm,
+                                    _swapFee
+                                );
+        require(spotPriceBefore <= maxPrice, "ERR_BAD_LIMIT_PRICE");
+
+        tokenAmountOut = calcOutGivenIn(
+                            inRecord.balance,
+                            inRecord.denorm,
+                            outRecord.balance,
+                            outRecord.denorm,
+                            tokenAmountIn,
+                            _swapFee
+                        );
+        require(tokenAmountOut >= minAmountOut, "ERR_LIMIT_OUT");
+
+        inRecord.balance = badd(inRecord.balance, tokenAmountIn);
+        outRecord.balance = bsub(outRecord.balance, tokenAmountOut);
+
+        spotPriceAfter = calcSpotPrice(
+                                inRecord.balance,
+                                inRecord.denorm,
+                                outRecord.balance,
+                                outRecord.denorm,
+                                _swapFee
+                            );
+        require(spotPriceAfter >= spotPriceBefore, "ERR_MATH_APPROX");     
+        require(spotPriceAfter <= maxPrice, "ERR_LIMIT_PRICE");
+        require(spotPriceBefore <= bdiv(tokenAmountIn, tokenAmountOut), "ERR_MATH_APPROX");
+
+        emit LOG_SWAP(msg.sender, tokenIn, tokenOut, tokenAmountIn, tokenAmountOut);
+
+        _pullUnderlying(tokenIn, msg.sender, tokenAmountIn);
+        _pushUnderlying(tokenOut, msg.sender, tokenAmountOut);
+
+        return (tokenAmountOut, spotPriceAfter);
+    }
+
+    function swapExactAmountOut(
+        address tokenIn,
+        uint maxAmountIn,
+        address tokenOut,
+        uint tokenAmountOut,
+        uint maxPrice
+    )
+        external
+        _logs_
+        _lock_ 
+        returns (uint tokenAmountIn, uint spotPriceAfter)
+    {
+        require(_records[tokenIn].bound, "ERR_NOT_BOUND");
+        require(_records[tokenOut].bound, "ERR_NOT_BOUND");
+        require(_publicSwap, "ERR_SWAP_NOT_PUBLIC");
+
+        Record storage inRecord = _records[address(tokenIn)];
+        Record storage outRecord = _records[address(tokenOut)];
+
+        require(tokenAmountOut <= bmul(outRecord.balance, MAX_OUT_RATIO), "ERR_MAX_OUT_RATIO");
+
+        uint spotPriceBefore = calcSpotPrice(
+                                    inRecord.balance,
+                                    inRecord.denorm,
+                                    outRecord.balance,
+                                    outRecord.denorm,
+                                    _swapFee
+                                );
+        require(spotPriceBefore <= maxPrice, "ERR_BAD_LIMIT_PRICE");
+
+        tokenAmountIn = calcInGivenOut(
+                            inRecord.balance,
+                            inRecord.denorm,
+                            outRecord.balance,
+                            outRecord.denorm,
+                            tokenAmountOut,
+                            _swapFee
+                        );
+        require(tokenAmountIn <= maxAmountIn, "ERR_LIMIT_IN");
+
+        inRecord.balance = badd(inRecord.balance, tokenAmountIn);
+        outRecord.balance = bsub(outRecord.balance, tokenAmountOut);
+
+        spotPriceAfter = calcSpotPrice(
+                                inRecord.balance,
+                                inRecord.denorm,
+                                outRecord.balance,
+                                outRecord.denorm,
+                                _swapFee
+                            );
+        require(spotPriceAfter >= spotPriceBefore, "ERR_MATH_APPROX");
+        require(spotPriceAfter <= maxPrice, "ERR_LIMIT_PRICE");
+        require(spotPriceBefore <= bdiv(tokenAmountIn, tokenAmountOut), "ERR_MATH_APPROX");
+
+        emit LOG_SWAP(msg.sender, tokenIn, tokenOut, tokenAmountIn, tokenAmountOut);
+
+        _pullUnderlying(tokenIn, msg.sender, tokenAmountIn);
+        _pushUnderlying(tokenOut, msg.sender, tokenAmountOut);
+
+        return (tokenAmountIn, spotPriceAfter);
+    }
 
 
     // ==
