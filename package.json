@@ -6,7 +6,7 @@
     "description": "defi index fund Contracts and ABI",
     "scripts": {
         "compile": "truffle compile",
-        "testrpc": "ganache-cli --deterministic --gasLimit 10000000 --port 9545",
+        "testrpc": "ganache-cli --deterministic --gasLimit 100000000 --port 9545",
         "test": "truffle test",
         "test:verbose": "VERBOSE=true truffle test",
         "coverage": "truffle run coverage",
