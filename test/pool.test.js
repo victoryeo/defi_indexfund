@@ -238,5 +238,24 @@ contract('BPool', async (accounts) => {
                 'ERR_SWAP_NOT_PUBLIC',
             );
         });
+
+        it('Fails calling any join exit swap before finalizing', async () => {
+            await truffleAssert.reverts(
+                pool.joinswapExternAmountIn(WETH, toWei('2.5'), toWei('0')),
+                'ERR_NOT_FINALIZED',
+            );
+            await truffleAssert.reverts(
+                pool.joinswapPoolAmountOut(WETH, toWei('2.5'), MAX),
+                'ERR_NOT_FINALIZED',
+            );
+            await truffleAssert.reverts(
+                pool.exitswapPoolAmountIn(WETH, toWei('2.5'), toWei('0')),
+                'ERR_NOT_FINALIZED',
+            );
+            await truffleAssert.reverts(
+                pool.exitswapExternAmountOut(WETH, toWei('2.5'), MAX),
+                'ERR_NOT_FINALIZED',
+            );
+        });
     })   
 })
