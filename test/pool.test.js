@@ -386,6 +386,30 @@ contract('BPool', async (accounts) => {
             console.log(userWethBalance.toString())
             //initially, user1 weth balance is 25
             assert.equal(23, fromWei(userWethBalance));
+
+            const wethBalance = await pool.getBalance(WETH);
+            console.log(wethBalance.toString())
+            const mkrBalance = await pool.getBalance(MKR);
+            console.log(mkrBalance.toString())
+        });
+
+        /*
+          Current pool balances
+          WETH - 52
+          MKR - 20.8
+          DAI - 10,400
+          XXX - 0
+        */
+
+        it('getSpotPriceSansFee and getSpotPrice', async () => {
+            const wethPrice = await pool.getSpotPriceSansFee(DAI, WETH);
+            assert.equal(200, fromWei(wethPrice));
+
+            const wethPriceFee = await pool.getSpotPrice(DAI, WETH);
+            const wethPriceFeeCheck = ((10400 / 5) / (52 / 5)) * (1 / (1 - 0.003));
+            // 200.6018054162487462
+            console.log(fromWei(wethPriceFee), wethPriceFeeCheck);
+            assert.equal(fromWei(wethPriceFee), wethPriceFeeCheck);
         });
     })
 })
