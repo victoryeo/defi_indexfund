@@ -4,6 +4,8 @@ const TToken = artifacts.require('TToken');
 const verbose = process.env.VERBOSE;
 
 const truffleAssert = require('truffle-assertions');
+const { calcOutGivenIn, calcRelativeDiff } = require('../src/lib/calc');
+
 
 contract('BPool', async (accounts) => {
     const admin = accounts[0];
@@ -410,6 +412,77 @@ contract('BPool', async (accounts) => {
             // 200.6018054162487462
             console.log(fromWei(wethPriceFee), wethPriceFeeCheck);
             assert.equal(fromWei(wethPriceFee), wethPriceFeeCheck);
+        });
+
+        it('Fail swapExactAmountIn unbound or over min max ratios', async () => {
+            await truffleAssert.reverts(
+                pool.swapExactAmountIn(WETH, toWei('2.5'), XXX, toWei('100'), toWei('200'), { from: user2 }),
+                'ERR_NOT_BOUND',
+            );
+            await truffleAssert.reverts(
+                pool.swapExactAmountIn(WETH, toWei('26.5'), DAI, toWei('5000'), toWei('200'), { from: user2 }),
+                'ERR_MAX_IN_RATIO',
+            );
+        });
+
+        it('swapExactAmountIn', async () => {
+            // 2.5 WETH -> DAI
+            // calcOutGivenIn                                                                            //
+            //uint tokenBalanceIn,
+            //uint tokenWeightIn,
+            //uint tokenBalanceOut,
+            //uint tokenWeightOut,
+            //uint tokenAmountIn,
+            //uint swapFee     
+            const expected = calcOutGivenIn(52, 5, 10400, 5, 2.5, 0.003);
+            const txr = await pool.swapExactAmountIn(
+                WETH,
+                toWei('2.5'),
+                DAI,
+                toWei('475'),
+                toWei('200'),
+                { from: user2 },
+            );
+            if (verbose) {
+                //token in
+                console.log(Number(fromWei(txr.logs[0].args[3])));
+                //token out
+                console.log(Number(fromWei(txr.logs[0].args[4])));
+            }
+            const log = txr.logs[0];
+            assert.equal(log.event, 'LOG_SWAP');
+            // 475.905805337091423
+
+            const actual = fromWei(log.args[4]);
+            const relDif = calcRelativeDiff(expected, actual);
+            if (verbose) {
+                console.log('swapExactAmountIn');
+                console.log(`expected: ${expected})`);
+                console.log(`actual  : ${actual})`);
+                console.log(`relDif  : ${relDif})`);
+            }
+
+            assert.isAtMost(relDif.toNumber(), errorDelta);
+
+            const userDaiBalance = await dai.balanceOf(user2);
+            if (verbose) {
+                console.log(fromWei(userDaiBalance));
+                console.log(Number(fromWei(log.args[4])));
+            }
+            assert.equal(fromWei(userDaiBalance), Number(fromWei(log.args[4])));
+
+            const wethPrice = await pool.getSpotPrice(DAI, WETH);
+            //WETH 52+2.5 = 54.5
+            //DAI 10400-475 = 9925
+            const wethPriceFeeCheck = ((9924.301394662908577 / 5) / (54.5 / 5)) * (1 / (1 - 0.003));
+            if (verbose) {
+                console.log(Number(fromWei(wethPrice)));
+                console.log(Number(wethPriceFeeCheck));
+            }           
+            assert.approximately(Number(fromWei(wethPrice)), Number(wethPriceFeeCheck), errorDelta*1000);
+
+            const daiNormWeight = await pool.getNormalizedWeight(DAI);
+            assert.equal(0.333333333333333333, fromWei(daiNormWeight));
         });
     })
 })
