@@ -304,5 +304,50 @@ contract('BPool', async (accounts) => {
             const swapFee = await pool.getSwapFee();
             assert.equal(0.003, fromWei(swapFee));
         });
+
+        it('Fails nonadmin finalizes pool', async () => {
+            await truffleAssert.reverts(
+                pool.finalize({ from: user1 }),
+                'ERR_NOT_CONTROLLER',
+            );
+        });
+
+        it('Admin finalizes pool', async () => {
+            const tx = await pool.finalize();
+            const adminBal = await pool.balanceOf(admin);
+            console.log(`adminBal ${adminBal}`);
+            assert.equal(100, fromWei(adminBal));
+            truffleAssert.eventEmitted(tx, 'Transfer', (event) => event.dst === admin);
+            const finalized = pool.isFinalized();
+            assert(finalized);
+        });
+
+        it('Cannot setPublicSwap, setSwapFee when finalized', async () => {
+            await truffleAssert.reverts(pool.setPublicSwap(false), 'ERR_IS_FINALIZED');
+            await truffleAssert.reverts(pool.setSwapFee(toWei('0.01')), 'ERR_IS_FINALIZED');
+        });
+
+        it('Fails binding new token after finalized', async () => {
+            await truffleAssert.reverts(
+                pool.bind(XXX, toWei('10'), toWei('5')),
+                'ERR_IS_FINALIZED',
+            );
+            await truffleAssert.reverts(
+                pool.rebind(DAI, toWei('10'), toWei('5')),
+                'ERR_IS_FINALIZED',
+            );
+        });
+
+        it('Fails unbinding after finalized', async () => {
+            await truffleAssert.reverts(
+                pool.unbind(WETH),
+                'ERR_IS_FINALIZED',
+            );
+        });
+
+        it('Get final tokens', async () => {
+            const finalTokens = await pool.getFinalTokens();
+            assert.sameMembers(finalTokens, [WETH, MKR, DAI]);
+        });
     })   
 })
