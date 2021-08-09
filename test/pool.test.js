@@ -519,6 +519,39 @@ contract('BPool', async (accounts) => {
 
             assert.isAtMost(relDif.toNumber(), errorDelta);
         });
+
+        it('Fails joins exits with limits', async () => {
+            await truffleAssert.reverts(
+                pool.joinPool(toWei('10'), [toWei('1'), toWei('1'), toWei('1')]),
+                'ERR_LIMIT_IN',
+            );
+
+            await truffleAssert.reverts(
+                pool.exitPool(toWei('10'), [toWei('10'), toWei('10'), toWei('10')]),
+                'ERR_LIMIT_OUT',
+            );
+
+            await truffleAssert.reverts(
+                pool.joinswapExternAmountIn(DAI, toWei('100'), toWei('10')),
+                'ERR_LIMIT_OUT',
+            );
+
+            await truffleAssert.reverts(
+                pool.joinswapPoolAmountOut(DAI, toWei('10'), toWei('100')),
+                'ERR_LIMIT_IN',
+            );
+
+            await truffleAssert.reverts(
+                pool.exitswapPoolAmountIn(DAI, toWei('1'), toWei('1000')),
+                'ERR_LIMIT_OUT',
+            );
+
+            await truffleAssert.reverts(
+                pool.exitswapExternAmountOut(DAI, toWei('1000'), toWei('1')),
+                'ERR_LIMIT_IN',
+            );
+        });
+
     })
 
     describe('Miscellaneous', () => {
