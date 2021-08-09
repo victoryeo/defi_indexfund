@@ -4,7 +4,7 @@ const TToken = artifacts.require('TToken');
 const verbose = process.env.VERBOSE;
 
 const truffleAssert = require('truffle-assertions');
-const { calcOutGivenIn, calcRelativeDiff } = require('../src/lib/calc');
+const { calcOutGivenIn, calcRelativeDiff, calcInGivenOut } = require('../src/lib/calc');
 
 
 contract('BPool', async (accounts) => {
@@ -427,7 +427,7 @@ contract('BPool', async (accounts) => {
 
         it('swapExactAmountIn', async () => {
             // 2.5 WETH -> DAI
-            // calcOutGivenIn                                                                            //
+            // calcOutGivenIn parameters:                                                                         //
             //uint tokenBalanceIn,
             //uint tokenWeightIn,
             //uint tokenBalanceOut,
@@ -445,9 +445,9 @@ contract('BPool', async (accounts) => {
             );
             if (verbose) {
                 //token in
-                console.log(Number(fromWei(txr.logs[0].args[3])));
+                console.log("tokenIn ", Number(fromWei(txr.logs[0].args[3])));
                 //token out
-                console.log(Number(fromWei(txr.logs[0].args[4])));
+                console.log("tokenOut ", Number(fromWei(txr.logs[0].args[4])));
             }
             const log = txr.logs[0];
             assert.equal(log.event, 'LOG_SWAP');
@@ -476,13 +476,48 @@ contract('BPool', async (accounts) => {
             //DAI 10400-475 = 9925
             const wethPriceFeeCheck = ((9924.301394662908577 / 5) / (54.5 / 5)) * (1 / (1 - 0.003));
             if (verbose) {
-                console.log(Number(fromWei(wethPrice)));
-                console.log(Number(wethPriceFeeCheck));
+                console.log("wethPrice ", Number(fromWei(wethPrice)));
+                console.log("wethPriceFeeCheck ", Number(wethPriceFeeCheck));
             }           
             assert.approximately(Number(fromWei(wethPrice)), Number(wethPriceFeeCheck), errorDelta*1000);
 
             const daiNormWeight = await pool.getNormalizedWeight(DAI);
             assert.equal(0.333333333333333333, fromWei(daiNormWeight));
+        });
+
+        it('swapExactAmountOut', async () => {
+            // ETH -> 1 MKR
+            // calcInGivenOut parameters:
+            //uint tokenBalanceIn,
+            //uint tokenWeightIn,
+            //uint tokenBalanceOut,
+            //uint tokenWeightOut,
+            //uint tokenAmountOut,
+            //uint swapFee
+            // WETH 54.5 ,   MKR 20.8
+            const expected = calcInGivenOut(54.5, 5, 20.8, 5, 1, 0.003);
+            const txr = await pool.swapExactAmountOut(
+                WETH,
+                toWei('3'),
+                MKR,
+                toWei('1.0'),
+                toWei('500'),
+                { from: user2 },
+            );
+            const log = txr.logs[0];
+            assert.equal(log.event, 'LOG_SWAP');
+            // 2.758274824473420261
+
+            const actual = fromWei(log.args[3]);
+            const relDif = calcRelativeDiff(expected, actual);
+            if (verbose) {
+                console.log('swapExactAmountOut');
+                console.log(`expected: ${expected})`);
+                console.log(`actual  : ${actual})`);
+                console.log(`relDif  : ${relDif})`);
+            }
+
+            assert.isAtMost(relDif.toNumber(), errorDelta);
         });
     })
 

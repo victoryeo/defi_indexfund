@@ -14,7 +14,17 @@ function calcOutGivenIn(tokenBalanceIn, tokenWeightIn, tokenBalanceOut, tokenWei
     return tokenAmountOut;
 }
 
+function calcInGivenOut(tokenBalanceIn, tokenWeightIn, tokenBalanceOut, tokenWeightOut, tokenAmountOut, swapFee) {
+    const weightRatio = Decimal(tokenWeightOut).div(Decimal(tokenWeightIn));
+    const diff = Decimal(tokenBalanceOut).minus(tokenAmountOut);
+    const y = Decimal(tokenBalanceOut).div(diff);
+    const foo = y.pow(weightRatio).minus(Decimal(1));
+    const tokenAmountIn = (Decimal(tokenBalanceIn).times(foo)).div(Decimal(1).minus(Decimal(swapFee)));
+    return tokenAmountIn;
+}
+
 module.exports = {
     calcRelativeDiff,
-    calcOutGivenIn
+    calcOutGivenIn,
+    calcInGivenOut
 }
