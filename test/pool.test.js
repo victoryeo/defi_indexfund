@@ -363,5 +363,29 @@ contract('BPool', async (accounts) => {
             await dai.approve(POOL, MAX, { from: user2 });
             await xxx.approve(POOL, MAX, { from: user2 });
         });
+
+        it('User1 joins pool', async () => {
+            const userWethBalanceBeg = await weth.balanceOf(user1);
+            console.log(userWethBalanceBeg.toString())
+            const daiBalanceBeg = await pool.getBalance(DAI)
+            console.log(daiBalanceBeg.toString())
+            //In joinPool, transfer the token from 0 to POOL (mint)
+            //then transfer from POOL to user1 (push)
+            //for amount of , takes place in BToken
+            const tx = await pool.joinPool(toWei('4'), [MAX, MAX, MAX], { from: user1 });
+            truffleAssert.eventEmitted(tx, 'Transfer', (event) => event.dst === user1)
+            /*pool.getPastEvents('Transfer', {fromBlock: 0, toBlock: 'latest'}, {})
+              .then(function(events){
+                console.log(events) 
+            })*/
+            const daiBalance = await pool.getBalance(DAI);
+            console.log(daiBalance.toString())
+            //initially. DAI balance is 10000
+            assert.equal(10400, fromWei(daiBalance));
+            const userWethBalance = await weth.balanceOf(user1);
+            console.log(userWethBalance.toString())
+            //initially, user1 weth balance is 25
+            assert.equal(23, fromWei(userWethBalance));
+        });
     })
 })
