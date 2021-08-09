@@ -349,5 +349,19 @@ contract('BPool', async (accounts) => {
             const finalTokens = await pool.getFinalTokens();
             assert.sameMembers(finalTokens, [WETH, MKR, DAI]);
         });
-    })   
+    })
+
+    describe('User interactions', () => {
+        it('Other users approve tokens', async () => {
+            await weth.approve(POOL, MAX, { from: user1 });
+            await mkr.approve(POOL, MAX, { from: user1 });
+            await dai.approve(POOL, MAX, { from: user1 });
+            await xxx.approve(POOL, MAX, { from: user1 });
+
+            await weth.approve(POOL, MAX, { from: user2 });
+            await mkr.approve(POOL, MAX, { from: user2 });
+            await dai.approve(POOL, MAX, { from: user2 });
+            await xxx.approve(POOL, MAX, { from: user2 });
+        });
+    })
 })
