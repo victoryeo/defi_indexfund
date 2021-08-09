@@ -739,4 +739,7 @@ contract BPool is BToken, BMath {
         _burn(amount);
     }
 
+    function helloworld() external pure returns (string memory) {
+        return "helloworld";
+    }
 }

@@ -485,4 +485,12 @@ contract('BPool', async (accounts) => {
             assert.equal(0.333333333333333333, fromWei(daiNormWeight));
         });
     })
+
+    describe('Miscellaneous', () => {
+        it('hello world', async () => {
+            const hw = await pool.helloworld.call();
+            console.log(hw)
+            assert.equal(hw, "helloworld")
+        })
+    })
 })
