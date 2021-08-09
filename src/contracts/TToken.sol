@@ -126,7 +126,7 @@ contract TToken {
     }
 
     function transferFrom(address src, address dst, uint amt) external returns (bool) {
-        require(msg.sender == src || amt <= _allowance[src][msg.sender], "ERR_BTOKEN_CALLER_NOT_ALLOWED");
+        require(msg.sender == src || amt <= _allowance[src][msg.sender], "ERR_TTOKEN_CALLER_NOT_ALLOWED");
         if (msg.sender != src) {
             emit NotSame(msg.sender, src);
         }
