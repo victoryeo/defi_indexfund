@@ -257,5 +257,52 @@ contract('BPool', async (accounts) => {
                 'ERR_NOT_FINALIZED',
             );
         });
+
+        it('Only controller can setPublicSwap', async () => {
+            await pool.setPublicSwap(true);
+            const publicSwap = pool.isPublicSwap();
+            assert(publicSwap);
+            await truffleAssert.reverts(pool.setPublicSwap(true, { from: user1 }), 'ERR_NOT_CONTROLLER');
+        });
+
+        it('Fails setting low swap fees', async () => {
+            await truffleAssert.reverts(
+                pool.setSwapFee(toWei('0.0000001')),
+                'ERR_MIN_FEE',
+            );
+        });
+
+        it('Fails setting high swap fees', async () => {
+            await truffleAssert.reverts(
+                pool.setSwapFee(toWei('0.11')),
+                'ERR_MAX_FEE',
+            );
+        });
+
+        it('Fails nonadmin sets fees or controller', async () => {
+            await truffleAssert.reverts(
+                pool.setSwapFee(toWei('0.003'), { from: user1 }),
+                'ERR_NOT_CONTROLLER',
+            );
+            await truffleAssert.reverts(
+                pool.setController(user1, { from: user1 }),
+                'ERR_NOT_CONTROLLER',
+            );
+        });
+
+        it('Admin sets controller', async () => {
+            await truffleAssert.passes(
+                pool.setController(user1, { from: admin })
+            ); 
+            await truffleAssert.passes(
+                pool.setController(admin, { from: user1 })
+            ); 
+        })
+
+        it('Admin sets swap fees', async () => {
+            await pool.setSwapFee(toWei('0.003'));
+            const swapFee = await pool.getSwapFee();
+            assert.equal(0.003, fromWei(swapFee));
+        });
     })   
 })
