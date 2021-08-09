@@ -82,7 +82,7 @@ contract('BPool', async (accounts) => {
         it('Fails binding tokens that are not approved', async () => {
             await truffleAssert.reverts(
                 pool.bind(MKR, toWei('10'), toWei('2.5')),
-                'ERR_BTOKEN_CALLER_NOT_ALLOWED',
+                'ERR_TTOKEN_CALLER_NOT_ALLOWED',
             );
         });
 
@@ -551,8 +551,49 @@ contract('BPool', async (accounts) => {
                 'ERR_LIMIT_IN',
             );
         });
+    })    
+    
+    describe('BToken interactions', () => {
+        it('Token descriptors', async () => {
+            const name = await pool.name();
+            assert.equal(name, 'Balancer Pool Token');
 
-    })
+            const symbol = await pool.symbol();
+            assert.equal(symbol, 'BPT');
+
+            const decimals = await pool.decimals();
+            assert.equal(decimals, 18);
+        });
+
+        it('Token allowances', async () => {
+            await pool.approve(user1, toWei('50'));
+            let allowance = await pool.allowance(admin, user1);
+            assert.equal(fromWei(allowance), 50);
+
+            await pool.increaseApproval(user1, toWei('50'));
+            allowance = await pool.allowance(admin, user1);
+            assert.equal(fromWei(allowance), 100);
+
+            await pool.decreaseApproval(user1, toWei('50'));
+            allowance = await pool.allowance(admin, user1);
+            assert.equal(fromWei(allowance), 50);
+
+            await pool.decreaseApproval(user1, toWei('100'));
+            allowance = await pool.allowance(admin, user1);
+            assert.equal(fromWei(allowance), 0);
+        });
+
+        it('Token transfers', async () => {
+            await truffleAssert.reverts(
+                pool.transferFrom(user2, admin, toWei('10')),
+                'ERR_BTOKEN_CALLER_NOT_ALLOWED',
+            );
+
+            await pool.transferFrom(admin, user2, toWei('1'));
+            await pool.approve(user2, toWei('10'));
+            await pool.transferFrom(admin, user2, toWei('1'), { from: user2 });
+        });
+    });
 
     describe('Miscellaneous', () => {
         it('hello world', async () => {
