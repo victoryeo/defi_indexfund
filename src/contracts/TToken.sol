@@ -34,7 +34,7 @@ contract TToken {
     }
 
     event Approval(address indexed src, address indexed dst, uint amt);
-    event Transfer(address indexed src, address indexed dst, uint amt);
+    event TTransfer(address indexed src, address indexed dst, uint amt);
     event NotSame(address sender, address src);
 
     // Math
@@ -72,7 +72,7 @@ contract TToken {
         require(_balance[src] >= amt, "ERR_INSUFFICIENT_BAL");
         _balance[src] = sub(_balance[src], amt);
         _balance[dst] = add(_balance[dst], amt);
-        emit Transfer(src, dst, amt);
+        emit TTransfer(src, dst, amt);
     }
 
     function _push(address to, uint amt) internal {
@@ -86,7 +86,7 @@ contract TToken {
     function _mint(address dst, uint amt) internal {
         _balance[dst] = add(_balance[dst], amt);
         _totalSupply = add(_totalSupply, amt);
-        emit Transfer(address(0), dst, amt);
+        emit TTransfer(address(0), dst, amt);
     }
 
     function allowance(address src, address dst) external view returns (uint) {
@@ -116,7 +116,7 @@ contract TToken {
         require(_balance[address(this)] >= amt, "ERR_INSUFFICIENT_BAL");
         _balance[address(this)] = sub(_balance[address(this)], amt);
         _totalSupply = sub(_totalSupply, amt);
-        emit Transfer(address(this), address(0), amt);
+        emit TTransfer(address(this), address(0), amt);
         return true;
     }
 
