@@ -278,5 +278,45 @@ contract('BPool', async (accounts) => {
             // Print current balances after operation
             await logAndAssertCurrentBalances();
         });
+
+        it('pAo = joinswapExternAmountIn(joinswapPoolAmountOut(pAo))', async () => {
+            const pAo = 10;
+            const tAi = await pool.joinswapPoolAmountOut.call(WETH, toWei(String(pAo)), MAX);
+            const calculatedPAo = await pool.joinswapExternAmountIn.call(WETH, String(tAi), toWei('0'));
+
+            const expected = Decimal(pAo);
+            const actual = fromWei(calculatedPAo);
+            const relDif = calcRelativeDiff(expected, actual);
+
+            if (verbose) {
+                console.log(`tAi: ${tAi})`);
+                console.log('pAo');
+                console.log(`expected: ${expected})`);
+                console.log(`actual  : ${actual})`);
+                console.log(`relDif  : ${relDif})`);
+            }
+
+            assert.isAtMost(relDif.toNumber(), errorDelta);
+        });
+
+        it('tAi = joinswapPoolAmountOut(joinswapExternAmountIn(tAi))', async () => {
+            const tAi = 1;
+            const pAo = await pool.joinswapExternAmountIn.call(DAI, toWei(String(tAi)), toWei('0'));
+            const calculatedtAi = await pool.joinswapPoolAmountOut.call(DAI, String(pAo), MAX);
+
+            const expected = Decimal(tAi);
+            const actual = fromWei(calculatedtAi);
+            const relDif = calcRelativeDiff(expected, actual);
+
+            if (verbose) {
+                console.log(`pAo: ${pAo})`);
+                console.log('tAi');
+                console.log(`expected: ${expected})`);
+                console.log(`actual  : ${actual})`);
+                console.log(`relDif  : ${relDif})`);
+            }
+
+            assert.isAtMost(relDif.toNumber(), errorDelta);
+        });
     })
 })
