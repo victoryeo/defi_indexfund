@@ -37,11 +37,56 @@ contract('BPool', async (accounts) => {
     const daiDenorm = '10';
 
     let currentDaiBalance = Decimal(daiBalance);
+    let previousDaiBalance = currentDaiBalance;
+
+    let currentPoolBalance = Decimal(0);
+    let previousPoolBalance = Decimal(0);
 
     const sumWeights = Decimal(wethDenorm).add(Decimal(daiDenorm));
     const wethNorm = Decimal(wethDenorm).div(Decimal(sumWeights));
     const daiNorm = Decimal(daiDenorm).div(Decimal(sumWeights));
 
+    async function logAndAssertCurrentBalances() {
+        let expected = currentPoolBalance;
+        let actual = await pool.totalSupply();
+        actual = Decimal(fromWei(actual));
+        let relDif = calcRelativeDiff(expected, actual);
+        if (verbose) {
+            console.log('Pool Balance');
+            console.log(`expected: ${expected})`);
+            console.log(`actual  : ${actual})`);
+            console.log(`relDif  : ${relDif})`);
+        }
+
+        assert.isAtMost(relDif.toNumber(), errorDelta);
+
+        expected = currentWethBalance;
+        actual = await pool.getBalance(WETH);
+        actual = Decimal(fromWei(actual));
+        relDif = calcRelativeDiff(expected, actual);
+        if (verbose) {
+            console.log('WETH Balance');
+            console.log(`expected: ${expected})`);
+            console.log(`actual  : ${actual})`);
+            console.log(`relDif  : ${relDif})`);
+        }
+
+        assert.isAtMost(relDif.toNumber(), errorDelta);
+
+        expected = currentDaiBalance;
+        actual = await pool.getBalance(DAI);
+        actual = Decimal(fromWei(actual));
+        relDif = calcRelativeDiff(expected, actual);
+        if (verbose) {
+            console.log('Dai Balance');
+            console.log(`expected: ${expected})`);
+            console.log(`actual  : ${actual})`);
+            console.log(`relDif  : ${relDif})`);
+        }
+
+        assert.isAtMost(relDif.toNumber(), errorDelta);
+    }
+    
     before(async () => {
         factory = await BFactory.deployed();
 
@@ -186,6 +231,29 @@ contract('BPool', async (accounts) => {
             }
 
             assert.isAtMost(relDif.toNumber(), errorDelta);
+        });
+
+        it('joinPool', async () => {
+            currentPoolBalance = '100';
+            await pool.finalize();
+
+            // Call function
+            const pAo = '1';
+            await pool.joinPool(toWei(pAo), [MAX, MAX]);
+
+            // Update balance states
+            previousPoolBalance = Decimal(currentPoolBalance);
+            currentPoolBalance = Decimal(currentPoolBalance).plus(Decimal(pAo));
+            // Balances of all tokens increase proportionally to the pool balance
+            previousWethBalance = currentWethBalance;
+            let balanceChange = (Decimal(pAo).div(previousPoolBalance)).mul(previousWethBalance);
+            currentWethBalance = currentWethBalance.plus(balanceChange);
+            previousDaiBalance = currentDaiBalance;
+            balanceChange = (Decimal(pAo).div(previousPoolBalance)).mul(previousDaiBalance);
+            currentDaiBalance = currentDaiBalance.plus(balanceChange);
+
+            // Print current balances after operation
+            await logAndAssertCurrentBalances();
         });
     })
 })
