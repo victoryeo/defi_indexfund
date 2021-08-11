@@ -78,7 +78,8 @@ contract BNum is BConst {
     {
         // raise numerator to power of 19
         uint _numerator  = numerator * BONE * 10;
-        require(numerator == 0 || _numerator / numerator == BONE * 10, "ERR_DIV_INTERNAL");
+        //require(numerator == 0 || _numerator / numerator == BONE * 10, "ERR_DIV_INTERNAL");
+        require(denominator != 0, "ERR_DIV_ZERO");
         // with rounding of last digit
         uint _quotient =  ((_numerator / denominator) + 5) / 10;
         return ( _quotient);
