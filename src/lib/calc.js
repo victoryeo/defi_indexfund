@@ -23,8 +23,18 @@ function calcInGivenOut(tokenBalanceIn, tokenWeightIn, tokenBalanceOut, tokenWei
     return tokenAmountIn;
 }
 
+function calcSpotPrice(tokenBalanceIn, tokenWeightIn, tokenBalanceOut, tokenWeightOut, swapFee) {
+    const numer = Decimal(tokenBalanceIn).div(Decimal(tokenWeightIn));
+    const denom = Decimal(tokenBalanceOut).div(Decimal(tokenWeightOut));
+    const ratio = numer.div(denom);
+    const scale = Decimal(1).div(Decimal(1).sub(Decimal(swapFee)));
+    const spotPrice = ratio.mul(scale);
+    return spotPrice;
+}
+
 module.exports = {
     calcRelativeDiff,
     calcOutGivenIn,
-    calcInGivenOut
+    calcInGivenOut,
+    calcSpotPrice
 }
