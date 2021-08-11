@@ -86,7 +86,7 @@ contract('BPool', async (accounts) => {
 
         assert.isAtMost(relDif.toNumber(), errorDelta);
     }
-    
+
     before(async () => {
         factory = await BFactory.deployed();
 
@@ -251,6 +251,29 @@ contract('BPool', async (accounts) => {
             previousDaiBalance = currentDaiBalance;
             balanceChange = (Decimal(pAo).div(previousPoolBalance)).mul(previousDaiBalance);
             currentDaiBalance = currentDaiBalance.plus(balanceChange);
+
+            // Print current balances after operation
+            await logAndAssertCurrentBalances();
+        });
+
+        it('exitPool', async () => {
+            // Call function
+            // so that the balances of all tokens will go back exactly to what they were before joinPool()
+            const pAi = 1 / (1 - exitFee);
+            const pAiAfterExitFee = pAi * (1 - exitFee);
+
+            await pool.exitPool(toWei(String(pAi)), [toWei('0'), toWei('0')]);
+
+            // Update balance states
+            previousPoolBalance = currentPoolBalance;
+            currentPoolBalance = currentPoolBalance.sub(Decimal(pAiAfterExitFee));
+            // Balances of all tokens increase proportionally to the pool balance
+            previousWethBalance = currentWethBalance;
+            let balanceChange = (Decimal(pAiAfterExitFee).div(previousPoolBalance)).mul(previousWethBalance);
+            currentWethBalance = currentWethBalance.sub(balanceChange);
+            previousDaiBalance = currentDaiBalance;
+            balanceChange = (Decimal(pAiAfterExitFee).div(previousPoolBalance)).mul(previousDaiBalance);
+            currentDaiBalance = currentDaiBalance.sub(balanceChange);
 
             // Print current balances after operation
             await logAndAssertCurrentBalances();
