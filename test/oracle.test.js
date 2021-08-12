@@ -21,7 +21,7 @@ contract('POracle', async () => {
                 await poracle.inputWethPrice(toWei('5'))
             }
             await poracle.calcWethPrice()
-            poracle.getPastEvents('LOG_PRICE', {fromBlock: 0, toBlock: 'latest'}, {})
+            poracle.getPastEvents('LOG_WETH_PRICE', {fromBlock: 0, toBlock: 'latest'}, {})
                 .then(function(events){
                 console.log(events) 
             })
