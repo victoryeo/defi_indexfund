@@ -21,7 +21,7 @@ contract POracle {
     uint private _pDai;
     uint private _pMkr;
 
-    event LOG_PRICE (
+    event LOG_WETH_PRICE (
         uint pWeth,
         uint pWethArrayIndex
     );
@@ -48,7 +48,7 @@ contract POracle {
         }
         // take the mean of the sum
         _pWeth = sum / BLOCK_INTERVAL;
-        emit LOG_PRICE(_pWeth, _pWethArrayIndex);
+        emit LOG_WETH_PRICE(_pWeth, _pWethArrayIndex);
     }
 
     function getWethPrice() external view returns (uint) {
