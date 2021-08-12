@@ -368,6 +368,7 @@ contract BPool is BToken, BMath {
         return calcSpotPrice(inRecord.balance, inRecord.denorm, outRecord.balance, outRecord.denorm, 0);
     }
 
+    // provide liquidity to trading tokens in pool, and get pool tokens (BToken) in return
     function joinPool(uint poolAmountOut, uint[] calldata maxAmountsIn)
         external
         _logs_
