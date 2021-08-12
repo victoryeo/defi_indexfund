@@ -104,6 +104,9 @@ contract('BPool', async (accounts) => {
                 console.log(POOL)
                 console.log(events) 
             })
+            await truffleAssert.passes(
+                pool.unbind(MKR)
+            );
         });
 
         it('Fails binding weights and balances outside MIX MAX', async () => {
@@ -137,8 +140,17 @@ contract('BPool', async (accounts) => {
             );
         });*/
 
+        /*
+            Tests assume token prices
+            WETH - $200
+            MKR  - $500
+            DAI  - $1
+            XXX  - $0
+        */
+
         it('Admin binds tokens', async () => {
             // Equal weights WETH, MKR, DAI
+            await pool.bind(MKR, toWei('20'), toWei('5'))
             await pool.bind(WETH, toWei('50'), toWei('5'));
             await pool.bind(DAI, toWei('10000'), toWei('5'));
             const numTokens = await pool.getNumTokens();
@@ -371,9 +383,9 @@ contract('BPool', async (accounts) => {
             console.log(userWethBalanceBeg.toString())
             const daiBalanceBeg = await pool.getBalance(DAI)
             console.log(daiBalanceBeg.toString())
-            //In joinPool, transfer the token from 0 to POOL (mint)
+            //In joinPool, transfer the btoken from 0 to POOL (mint)
             //then transfer from POOL to user1 (push)
-            //for amount of , takes place in BToken
+            //for amount of 4, takes place in BToken
             const tx = await pool.joinPool(toWei('4'), [MAX, MAX, MAX], { from: user1 });
             truffleAssert.eventEmitted(tx, 'Transfer', (event) => event.dst === user1)
             /*pool.getPastEvents('Transfer', {fromBlock: 0, toBlock: 'latest'}, {})
@@ -381,18 +393,25 @@ contract('BPool', async (accounts) => {
                 console.log(events) 
             })*/
             const daiBalance = await pool.getBalance(DAI);
-            console.log(daiBalance.toString())
+            console.log("daiBalance ", daiBalance.toString())
             //initially. DAI balance is 10000
             assert.equal(10400, fromWei(daiBalance));
             const userWethBalance = await weth.balanceOf(user1);
-            console.log(userWethBalance.toString())
+            console.log("user1 wethBalance", userWethBalance.toString())
             //initially, user1 weth balance is 25
             assert.equal(23, fromWei(userWethBalance));
 
             const wethBalance = await pool.getBalance(WETH);
-            console.log(wethBalance.toString())
+            console.log("wethBalance ", wethBalance.toString())
             const mkrBalance = await pool.getBalance(MKR);
-            console.log(mkrBalance.toString())
+            console.log("mkrBalance ", mkrBalance.toString())
+
+            pool.getPastEvents('LOG_JOIN', {fromBlock: 0, toBlock: 'latest'}, {})
+              .then(function(events){
+                console.log(events) 
+            })
+            console.log(user1)
+            console.log(POOL)
         });
 
         /*
@@ -410,7 +429,7 @@ contract('BPool', async (accounts) => {
             const wethPriceFee = await pool.getSpotPrice(DAI, WETH);
             const wethPriceFeeCheck = ((10400 / 5) / (52 / 5)) * (1 / (1 - 0.003));
             // 200.6018054162487462
-            console.log(fromWei(wethPriceFee), wethPriceFeeCheck);
+            console.log("wethPriceFee wethPriceFeeCheck ", fromWei(wethPriceFee), wethPriceFeeCheck);
             assert.equal(fromWei(wethPriceFee), wethPriceFeeCheck);
         });
 
