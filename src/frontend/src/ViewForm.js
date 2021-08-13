@@ -16,9 +16,9 @@ class ViewForm extends Component {
           event.preventDefault()
         }}>
         <div>
-          <label className="float-left"><b>Fund</b></label>
+          <label className="float-left"><b>Fund</b>&nbsp;</label>
           <span className="float-right text-muted">
-            Balance: {window.web3.utils.fromWei(this.props.totalBalance, 'Ether')}
+            Balance: {this.props.totalBalance}
           </span>
         </div>  
       </form>
