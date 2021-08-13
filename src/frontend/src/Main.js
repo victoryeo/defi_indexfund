@@ -14,7 +14,7 @@ class Main extends Component {
         if(this.state.currentForm === 'create') {
             content = <CreateForm
               totalBalance={this.props.totalBalance}
-              getTotal={this.props.getTotal}
+              calcTotal={this.props.calcTotal}
             />
         } else {
             content = <ViewForm
