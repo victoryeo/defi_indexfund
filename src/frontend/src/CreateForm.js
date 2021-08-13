@@ -20,8 +20,16 @@ class CreateForm extends Component {
     return (
       <form className="mb-3" onSubmit={(event) => {
           event.preventDefault()
-          let totalFundAmount
-          totalFundAmount = this.props.getTotal()
+          let etherAmount = this.inputEthAmount.value.toString()
+          console.log(etherAmount)
+          let etherWeight = this.inputEthWeight.value.toString()
+          console.log(etherWeight)
+          let daiAmount = this.inputDaiAmount.value.toString()
+          let daiWeight = this.inputDaiWeight.value.toString()
+          let tokenAmount = this.inputTokenAmount.value.toString()
+          let tokenWeight = this.inputTokenWeight.value.toString()
+          this.props.calcTotal(etherAmount, etherWeight,
+            daiAmount, daiWeight, tokenAmount, tokenWeight)
         }}>
 
         <div>
@@ -35,12 +43,12 @@ class CreateForm extends Component {
           <input
             type="text"
             onChange={(event) => {
-              const etherAmount = this.input.value.toString()
+              const etherAmount = this.inputEthAmount.value.toString()
               this.setState({
                 etherAmount: etherAmount 
               })
             }}
-            ref={(input) => { this.input = input }}
+            ref={(input) => { this.inputEthAmount = input }}
             className="form-control form-control-lg"
             placeholder="0"
             required />
@@ -49,12 +57,12 @@ class CreateForm extends Component {
           <input
             type="text"
             onChange={(event) => {
-              const etherWeight = this.input.value.toString()
+              const etherWeight = this.inputEthWeight.value.toString()
               this.setState({
                 etherWeight: etherWeight
               })
             }}
-            ref={(input) => { this.input = input }}
+            ref={(input) => { this.inputEthWeight = input }}
             className="form-control form-control-lg"
             placeholder="0"
             required />  
@@ -77,12 +85,12 @@ class CreateForm extends Component {
           <input
             type="text"
             onChange={(event) => {
-              const daiAmount = this.input.value.toString()
+              const daiAmount = this.inputDaiAmount.value.toString()
               this.setState({
                 daiAmount: daiAmount
               })
             }}
-            ref={(input) => { this.input = input }}
+            ref={(input) => { this.inputDaiAmount = input }}
             className="form-control form-control-lg"
             placeholder="0"
             required />
@@ -91,12 +99,12 @@ class CreateForm extends Component {
           <input
             type="text"
             onChange={(event) => {
-              const daiWeight = this.input.value.toString()
+              const daiWeight = this.inputDaiWeight.value.toString()
               this.setState({
                 daiWeight: daiWeight
               })
             }}
-            ref={(input) => { this.input = input }}
+            ref={(input) => { this.inputDaiWeight = input }}
             className="form-control form-control-lg"
             placeholder="0"
             required /> 
@@ -119,12 +127,12 @@ class CreateForm extends Component {
           <input
             type="text"
             onChange={(event) => {
-              const tokenAmount = this.input.value.toString()
+              const tokenAmount = this.inputTokenAmount.value.toString()
               this.setState({
                 tokenAmount: tokenAmount
               })
             }}
-            ref={(input) => { this.input = input }}
+            ref={(input) => { this.inputTokenAmount = input }}
             className="form-control form-control-lg"
             placeholder="0"
             required />
@@ -133,12 +141,12 @@ class CreateForm extends Component {
           <input
             type="text"
             onChange={(event) => {
-              const tokenWeight = this.input.value.toString()
+              const tokenWeight = this.inputTokenWeight.value.toString()
               this.setState({
                 tokenWeight: tokenWeight
               })
             }}
-            ref={(input) => { this.input = input }}
+            ref={(input) => { this.inputTokenWeight = input }}
             className="form-control form-control-lg"
             placeholder="0"
             required /> 
