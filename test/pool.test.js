@@ -454,6 +454,9 @@ contract('BPool', async (accounts) => {
             //uint tokenAmountIn,
             //uint swapFee     
             const expected = calcOutGivenIn(52, 5, 10400, 5, 2.5, 0.003);
+            // swapExactAmountIn parameters
+            //address tokenIn, uint tokenAmountIn, address tokenOut, 
+            //uint minAmountOut, uint maxPrice
             const txr = await pool.swapExactAmountIn(
                 WETH,
                 toWei('2.5'),
@@ -485,8 +488,8 @@ contract('BPool', async (accounts) => {
 
             const userDaiBalance = await dai.balanceOf(user2);
             if (verbose) {
-                console.log(fromWei(userDaiBalance));
-                console.log(Number(fromWei(log.args[4])));
+                console.log("userDaiBalance ", fromWei(userDaiBalance));
+                console.log("actual ", Number(fromWei(log.args[4])));
             }
             assert.equal(fromWei(userDaiBalance), Number(fromWei(log.args[4])));
 
@@ -515,6 +518,9 @@ contract('BPool', async (accounts) => {
             //uint swapFee
             // WETH 54.5 ,   MKR 20.8
             const expected = calcInGivenOut(54.5, 5, 20.8, 5, 1, 0.003);
+            // swapExactAmountOut parameters:
+            //address tokenIn, uint maxAmountIn, address tokenOut,
+            //uint tokenAmountOut, uint maxPrice
             const txr = await pool.swapExactAmountOut(
                 WETH,
                 toWei('3'),
