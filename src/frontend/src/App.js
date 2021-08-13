@@ -44,11 +44,14 @@ class App extends Component {
     }
   }
 
-  getTotal = async () => {
-
-    try {        
+  calcTotal = async (etherAmount, etherWeight, daiAmount, daiWeight,
+      tokenAmount, tokenWeight) => {
+    let totalBal;
+    totalBal = etherAmount*etherWeight +
+      daiAmount * daiWeight + tokenAmount * tokenWeight
+    try {
       this.setState({
-         totalBalance: "0",
+         totalBalance: totalBal,
       })
     }      
     catch (err) {
@@ -64,7 +67,7 @@ class App extends Component {
     } else {
       content = <Main
         totalBalance={this.state.totalBalance}
-        getTotal={this.getTotal}
+        calcTotal={this.calcTotal}
       />
     }
     return (
