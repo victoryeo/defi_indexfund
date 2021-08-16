@@ -1,5 +1,5 @@
 /* Contract address */
-const address = "0x67B5656d60a809915323Bf2C40A8bEF15A152e3e"
+const address = "0xDb56f2e9369E0D7bD191099125a3f6C370F8ed15"
 
 /* Contract abi code */
 const abi = [
@@ -70,13 +70,18 @@ const abi = [
 ]
 
 const accessPOContract = async (web3) => {
+  let contInst = await new web3.eth.Contract(
+    abi, address
+  )
+  console.log(contInst)
+  let accounts = await web3.eth.getAccounts()
+  //set weth price
+  await contInst.methods.inputWethPrice(web3.utils.toWei('5')).send({from: accounts[0]})
+  await contInst.methods.inputWethPrice(web3.utils.toWei('5')).send({from: accounts[0]})
+  await contInst.methods.calcWethPrice().send({from: accounts[0]})
+  const wethPrice = await contInst.methods.getWethPrice().call()
 
-   let contInst = await new web3.eth.Contract(
-      abi, address
-   )
-   console.log(contInst)
-
-   return contInst
+  return wethPrice
 };
 
 export default accessPOContract

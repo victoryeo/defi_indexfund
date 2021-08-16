@@ -44,12 +44,7 @@ class App extends Component {
       })
 
       //access price oracle contract
-      const contInst = await accessPOContract(this.web3)
-      //set weth price
-      await contInst.methods.inputWethPrice(this.web3.utils.toWei('5')).send({from: accounts[0]})
-      await contInst.methods.inputWethPrice(this.web3.utils.toWei('5')).send({from: accounts[0]})
-      await contInst.methods.calcWethPrice().send({from: accounts[0]})
-      const wethPrice = await contInst.methods.getWethPrice().call()
+      const wethPrice = await accessPOContract(this.web3)
       console.log(this.web3.utils.fromWei(wethPrice))
     }
   }
