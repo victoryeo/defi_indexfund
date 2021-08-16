@@ -3,6 +3,8 @@ import './App.css'
 import Main from './Main'
 import getWeb3 from './web3/getWeb3'
 import accessPOContract from './web3/accessPOracle'
+import { ConnectWallet } from './web3/ConnectWallet'
+import connectMetamaskWallet from './web3/connectMetamaskWallet'
 
 class App extends Component {
   constructor(props) {
@@ -14,7 +16,8 @@ class App extends Component {
       ethBalance: '0',
       tokenBalance: '0',
       loading: true,
-      errorFetch: null
+      errorFetch: null,
+      selectedAddress: undefined,
     }
     this.web3 = null
     this.wethPrice = 1
@@ -69,7 +72,20 @@ class App extends Component {
     }
   }
 
+  _connect = async() => {
+    const userAddr = await connectMetamaskWallet()
+    console.log(userAddr)
+    this.setState({selectedAddress: userAddr})
+  }
+
   render(){
+    if (!this.state.selectedAddress) {
+      return (
+      <ConnectWallet 
+        connectWallet={() => this._connect()} 
+      />
+      )
+    }
     let content
     if(this.state.loading) {
       content = <p id="loader" className="text-center">Loading...</p>
@@ -81,6 +97,8 @@ class App extends Component {
     }
     return (
       <div className="App">
+        Welcome <b>{this.state.selectedAddress}</b>
+
         {content}
         
         { this.state.errorFetch && 
