@@ -17,6 +17,7 @@ class App extends Component {
       errorFetch: null
     }
     this.web3 = null
+    this.wethPrice = 1
   }
 
   async componentDidMount() {
@@ -46,14 +47,17 @@ class App extends Component {
       //access price oracle contract
       const wethPrice = await accessPOContract(this.web3)
       console.log(this.web3.utils.fromWei(wethPrice))
+
+      this.wethPrice = this.web3.utils.fromWei(wethPrice)
     }
   }
 
   calcTotal = async (etherAmount, etherWeight, daiAmount, daiWeight,
       tokenAmount, tokenWeight) => {
     let totalBal;
-    totalBal = etherAmount*etherWeight +
-      daiAmount * daiWeight + tokenAmount * tokenWeight
+    let totalWeight = etherWeight + daiWeight + tokenWeight
+    totalBal = (this.wethPrice*etherAmount*etherWeight +
+      daiAmount * daiWeight + tokenAmount * tokenWeight) 
     try {
       this.setState({
          totalBalance: totalBal,

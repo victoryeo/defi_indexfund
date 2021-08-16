@@ -18,7 +18,7 @@ class ViewForm extends Component {
         <div>
           <label className="float-left"><b>Fund</b>&nbsp;</label>
           <span className="float-right text-muted">
-            Balance: {this.props.totalBalance}
+            Index: {this.props.totalBalance}
           </span>
         </div>  
       </form>
