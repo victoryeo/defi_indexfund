@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import './App.css'
 import Main from './Main'
 import getWeb3 from './web3/getWeb3'
+import accessPOContract from './web3/accessPOracle'
 
 class App extends Component {
   constructor(props) {
@@ -41,6 +42,15 @@ class App extends Component {
         tokenBalance: "0",
         ethBalance: ethBal.toString()
       })
+
+      //access price oracle contract
+      const contInst = await accessPOContract(this.web3)
+      //set weth price
+      await contInst.methods.inputWethPrice(this.web3.utils.toWei('5')).send({from: accounts[0]})
+      await contInst.methods.inputWethPrice(this.web3.utils.toWei('5')).send({from: accounts[0]})
+      await contInst.methods.calcWethPrice().send({from: accounts[0]})
+      const wethPrice = await contInst.methods.getWethPrice().call()
+      console.log(this.web3.utils.fromWei(wethPrice))
     }
   }
 
