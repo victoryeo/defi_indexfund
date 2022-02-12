@@ -21,6 +21,8 @@ class ViewForm extends Component {
             Index: {this.props.totalBalance}
           </span>
         </div>  
+        <hr></hr>
+        <i>Fund index is the aggregate of Amount*Weightage</i>
       </form>
     );
   }
