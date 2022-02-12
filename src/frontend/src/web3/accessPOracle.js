@@ -1,5 +1,5 @@
 /* Contract address */
-const address = "0xDb56f2e9369E0D7bD191099125a3f6C370F8ed15"
+const address = "0xA26F05aE0E0a4d3dE028785eAb1b9E491950b5e8"
 
 /* Contract abi code */
 const abi = [

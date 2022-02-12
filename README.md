@@ -14,4 +14,4 @@ The smart contract test code is in test/ folder.
 Run "truffle compile" to compile the smart contracts.
 Run "truffle test" to test the smart contracts.
 
-The code is tested with Ganache. The idea is inspired by balancer.
+The code is tested with Ganache and Rinkeby. The idea is inspired by balancer.

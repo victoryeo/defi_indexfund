@@ -8,7 +8,7 @@ const getWeb3 = new Promise(resolve => {
     let results
     // Metamask no longer injects web3
     //console.log("web3 " + window.web3)
-    if (!window.ethereum) {
+    if (window.ethereum) {
         console.log(window.ethereum)
         // new way of accessing Metamask
         window.web3 = new Web3(window.ethereum)

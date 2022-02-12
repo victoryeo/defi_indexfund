@@ -1,3 +1,10 @@
+const HDWalletProvider = require('@truffle/hdwallet-provider');
+
+const fs = require('fs');
+const mnemonic = JSON.parse(fs.readFileSync(".secret.json").toString().trim());
+console.log(mnemonic)
+console.log(mnemonic["mnemonic"])
+
 module.exports = {
   // Uncommenting the defaults below 
   // provides for an easier quick-start with Ganache.
@@ -11,6 +18,17 @@ module.exports = {
       port: 9545,
       network_id: "*",
       gas: 100000000,
+    },
+    rinkeby: {
+      provider: () => new HDWalletProvider(
+        mnemonic["mnemonic"], `wss://eth-rinkeby.alchemyapi.io/v2/LD7o_ybolRcgiL5t7k0b0tjpe7dIpk7l`
+      ),
+      network_id: 4,       
+      gas: 5500000,        
+      //confirmations: 2,
+      networkCheckTimeout: 1000000,    
+      timeoutBlocks: 200, 
+      skipDryRun: true     
     },
     coverage: {
       host: 'localhost',
