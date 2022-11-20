@@ -12,7 +12,7 @@ contract('TMath', async () => {
         });
 
         it('badd throws on overflow', async () => {
-            await truffleAssert.reverts(tmath.calc_badd(1, MAX), 'ERR_ADD_OVERFLOW');
+            await truffleAssert.reverts(tmath.calc_badd(1, MAX), 'VM Exception');
         });
 
         it('bsub throws on underflow', async () => {
@@ -20,7 +20,7 @@ contract('TMath', async () => {
         });
 
         it('bmul throws on overflow', async () => {
-            await truffleAssert.reverts(tmath.calc_bmul(2, MAX), 'ERR_MUL_OVERFLOW');
+            await truffleAssert.reverts(tmath.calc_bmul(2, MAX), 'VM Exception');
         });
 
         it('bdiv throws on div by 0', async () => {
