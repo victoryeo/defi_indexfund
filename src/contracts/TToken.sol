@@ -48,13 +48,13 @@ contract TToken {
     }
 
     constructor(
-        string memory name,
-        string memory symbol,
-        uint8 decimals
+        string memory name_,
+        string memory symbol_,
+        uint8 decimals_
     ) {
-        _name = name;
-        _symbol = symbol;
-        _decimals = decimals;
+        _name = name_;
+        _symbol = symbol_;
+        _decimals = decimals_;
         _owner = msg.sender;
     }
 
