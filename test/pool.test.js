@@ -331,7 +331,7 @@ contract('BPool', async (accounts) => {
             const adminBal = await pool.balanceOf(admin);
             console.log(`adminBal ${adminBal}`);
             assert.equal(100, fromWei(adminBal));
-            truffleAssert.eventEmitted(tx, 'Transfer', (event) => event.dst === admin);
+            truffleAssert.eventEmitted(tx, 'B_Transfer', (event) => event.dst === admin);
             const finalized = pool.isFinalized();
             assert(finalized);
         });
@@ -387,7 +387,7 @@ contract('BPool', async (accounts) => {
             //then transfer from POOL to user1 (push)
             //for amount of 4, takes place in BToken
             const tx = await pool.joinPool(toWei('4'), [MAX, MAX, MAX], { from: user1 });
-            truffleAssert.eventEmitted(tx, 'Transfer', (event) => event.dst === user1)
+            truffleAssert.eventEmitted(tx, 'B_Transfer', (event) => event.dst === user1)
             /*pool.getPastEvents('Transfer', {fromBlock: 0, toBlock: 'latest'}, {})
               .then(function(events){
                 console.log(events) 
