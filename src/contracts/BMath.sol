@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -126,9 +128,10 @@ contract BMath is BConst, BNum {
         returns (uint poolAmountOut)
     {
         // Charge the trading fee for the proportion of tokenAi
-        ///  which is implicitly traded to the other pool tokens.
+        //   which is implicitly traded to the other pool tokens.
         // That proportion is (1- weightTokenIn)
         // tokenAiAfterFee = tAi * (1 - (1-weightTi) * poolFee);
+
         uint normalizedWeight = bdiv(tokenWeightIn, totalWeight);
         uint zaz = bmul(bsub(BONE, normalizedWeight), swapFee); 
         uint tokenAmountInAfterFee = bmul(tokenAmountIn, bsub(BONE, zaz));
