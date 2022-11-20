@@ -87,7 +87,7 @@ contract BPool is BToken, BMath {
     mapping(address=>Record) private  _records;
     uint private _totalWeight;
 
-    constructor() public {
+    constructor() {
         _controller = msg.sender;
         _factory = msg.sender;
         _swapFee = MIN_FEE;

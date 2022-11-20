@@ -51,7 +51,7 @@ contract BFactory {
 
     address private _blabs;
 
-    constructor() public {
+    constructor() {
         _blabs = msg.sender;
     }
 

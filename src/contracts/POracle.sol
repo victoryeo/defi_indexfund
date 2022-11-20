@@ -28,7 +28,7 @@ contract POracle {
         uint pWethArrayIndex
     );
     
-    constructor() public {
+    constructor() {
         _pWethArrayIndex = 0;
     }
 
