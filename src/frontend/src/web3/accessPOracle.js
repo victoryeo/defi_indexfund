@@ -76,8 +76,8 @@ const accessPOContract = async (web3) => {
   console.log(contInst)
   let accounts = await web3.eth.getAccounts()
   //set weth price
-  await contInst.methods.inputWethPrice(web3.utils.toWei('5')).send({from: accounts[0]})
-  await contInst.methods.inputWethPrice(web3.utils.toWei('5')).send({from: accounts[0]})
+  await contInst.methods.inputWethPrice(web3.utils.toWei('5', 'ether')).send({from: accounts[0]})
+  await contInst.methods.inputWethPrice(web3.utils.toWei('5', 'ether')).send({from: accounts[0]})
   await contInst.methods.calcWethPrice().send({from: accounts[0]})
   const wethPrice = await contInst.methods.getWethPrice().call()
 
